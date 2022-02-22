@@ -13,15 +13,18 @@
                 <a class="nav-link" href="#">Doctors</a>
                 </li>
                 <li class="nav-item">
-                <a class="nav-link" href="#">My Appointments</a>
+                <a class="nav-link" href="#" id="appoint">My Appointments</a>
                 </li>
             </ul>
-            <ul class="navbar-nav admin ms-auto">
-                <li class="nav-item">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item" id="admin"> 
                     <a href="#" class="nav-link">Admin Page</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Logout</a>
+                    <a class="nav-link" onclick="handleLogout()" id="log-state" style="cursor: pointer !important;">Log out</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'account:signup' %}" id="signup" style="display: none;">Sign up</a>
                 </li>
             </ul>
         </div>

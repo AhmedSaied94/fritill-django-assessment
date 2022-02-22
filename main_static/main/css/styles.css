@@ -1,0 +1,19 @@
+.clinic .card:hover {
+  -webkit-transform: scale(1.05) !important;
+  transform: scale(1.05) !important;
+  cursor: pointer;
+}
+.clinic .card {
+  -webkit-transition: all 0.3s linear !important;
+  transition: all 0.3s linear !important;
+}
+.clinic .card img {
+  height: 250px !important;
+}
+* {
+  scroll-behavior: smooth !important;
+}
+
+.clinic .card .card-body {
+  height: 100px !important;
+}

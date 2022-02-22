@@ -1,0 +1,12 @@
+.clinic {
+  transition: all 0.3 linear;
+  &:hover {
+    transform: scale(1.1);
+  }
+  .card {
+    height: 700px;
+    img {
+      max-height: 50%;
+    }
+  }
+}

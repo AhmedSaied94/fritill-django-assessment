@@ -1,0 +1,54 @@
+{% extends 'main/base.html' %}
+{% block title %} Fritill clinic Reset Password {% endblock %}
+
+{% block main %} 
+
+<div class="row mt-5">
+    <div class="col-12 col-lg-8 mx-auto">
+        <div id="alerts"></div>
+        <form id="login-form" onsubmit="handleSubmit(event)">
+
+           
+            <div class="form-group">
+                <label for="email" class="form-label mt-3">Email address</label>
+                <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+                <small id="emailHelp" class="form-text text-muted">If your mail in our database youl receive mail to reset password.</small>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra %} 
+<script>
+    let handleSubmit = e => {
+        e.preventDefault()
+        let loginData = {
+            username: $('#username').val(),
+            password: $('#password').val(),
+        }
+        // if (newUser.password !== newUser.password2) $('#alerts').append(`<div class="alert alert-dismissible alert-danger" id="alert">
+        //     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        //     <strong>Oh snap!</strong> Password dosen't match
+        // </div>`)
+        console.log(loginData)
+        let jsonObj = JSON.stringify(loginData)
+        fetch('http://localhost:8000/auth/api/token/', {
+            method: 'POST',
+            headers: {'content-type': 'application/json'},
+            body: jsonObj
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.access){
+                localStorage.setItem('access_token', data.access)
+                localStorage.setItem('refresh_token', data.refresh)
+                window.location.href = 'http://localhost:8000/'
+            }
+        })
+    }
+</script>
+{% endblock %}

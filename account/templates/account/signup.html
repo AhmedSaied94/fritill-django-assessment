@@ -1,0 +1,97 @@
+{% extends 'main/base.html' %}
+{% block title %} Fritill clinic Log in {% endblock %}
+
+{% block main %} 
+
+<div class="row mt-5">
+    <div class="col-12 col-lg-8 mx-auto">
+        <div id="alerts"></div>
+        <form id="login-form" onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label for="email" class="form-label mt-3">Email address</label>
+                <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+                <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+            </div>
+            <div class="form-group">
+                <label for="username" class="form-label mt-3">User Name</label>
+                <input type="text" class="form-control" id="username"placeholder="User Name">
+            </div>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label for="password" class="form-label mt-3">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password">
+                </div>
+                <div class="form-group col-6">
+                    <label for="password2" class="form-label mt-3">Re-password</label>
+                    <input type="password" class="form-control" id="password2" placeholder="Re-password">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-6">
+                    <label for="first_name" class="form-label mt-3">First Name</label>
+                    <input type="text" class="form-control" id="first_name" placeholder="Enter First Name">
+                </div>
+                <div class="form-group col-6">
+                    <label for="last_name" class="form-label mt-3">Last Name</label>
+                    <input type="text" class="form-control" id="last_name" placeholder="Enter Last Name">
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-12 col-sm-6">
+                    <label for="mobile" class="form-label mt-3">Mobile</label>
+                    <input type="number" class="form-control" id="mobile" placeholder="Enter Mobile">
+                </div>
+                <div class="form-group col-6 col-sm-3">
+                    <label for="gender" class="form-label mt-3">Example select</label>
+                    <select class="form-select" id="gender">
+                    <option>Male</option>
+                    <option>Female</option>
+
+                    </select>
+                </div>
+                <div class="form-group col-6 col-sm-3">
+                    <label for="age" class="form-label mt-3">Age</label>
+                    <input type="number" class="form-control" id="age" placeholder="Enter Age">
+                </div>
+                <div class="form-group d-grid gap-2 mt-4">
+                    <input type="submit" value="Sign up" class="btn btn-primary">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra %} 
+<script>
+    let handleSubmit = e => {
+        e.preventDefault()
+        let newUser = {
+            email: $('#email').val(),
+            username: $('#username').val(),
+            password: $('#password').val(),
+            password2: $('#password2').val(),
+            first_name: $('#first_name').val(),
+            last_name: $('#last_name').val(),
+            mobile: $('#mobile').val(),
+            gender: $('#gender').val(),
+            age: $('#age').val(),
+        }
+        if (newUser.password !== newUser.password2) $('#alerts').append(`<div class="alert alert-dismissible alert-danger" id="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>Oh snap!</strong> Password dosen't match
+        </div>`)
+        console.log(newUser)
+        let jsonObj = JSON.stringify(newUser)
+        fetch('http://localhost:8000/auth/signup/', {
+            method: 'POST',
+            headers: {'content-type': 'application/json'},
+            body: jsonObj
+        })
+        .then(res => res.json())
+        .then(data => console.log(data))
+    }
+</script>
+{% endblock %}

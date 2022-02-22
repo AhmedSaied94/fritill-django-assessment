@@ -2,6 +2,38 @@
 
 {% block title %} Home {% endblock %}
 
-{% block main %} {% endblock %}
+{% block main %} 
+<div class="row mt-5">
+    {% for clinic in clinics %}
+
+    <div class="col-12 col-md-6 col-lg-4 mx-auto clinic">
+        <div class="card mb-4">
+            <h3 class="card-header">{{ clinic.name }}</h3>
+            <div class="card-body">
+              <h5 class="card-title">{{ clinic.name }} Clinic</h5>
+              <h6 class="card-subtitle text-muted">
+                  {% for day in clinic.days.all %}
+                    {{ day.day }}, 
+                  {% endfor %}
+              </h6>
+            </div>
+            <img src="{{ clinic.image.url }}" class="card-img-top" alt="...">
+            <div class="card-body">
+              <p class="card-text">{{ clinic.describtion }}</p>
+            </div>
+            <div class="card-body">
+              <a href="#" class="btn btn-outline-success me-1">Reserve</a>
+              <a href="#" class="btn btn-outline-info">Request</a>
+            </div>
+            <div class="card-footer text-muted">
+              2 days ago
+            </div>
+          </div>
+
+    </div>
+
+    {% endfor %}
+</div>
+{% endblock %}
 
 {% block extra %} {% endblock %}

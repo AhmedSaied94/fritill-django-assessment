@@ -9,6 +9,7 @@
     <title>{% block title %}Django Clink{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'main/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'main/css/styles.css' %}">
 </head>
 <body>
     <!-- Nav Bar -->
@@ -30,6 +31,22 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.slim.min.js" integrity="sha512-/DXTXr6nQodMUiq+IUJYCt2PPOUjrHJ9wFrqpJ3XkgPNOZVfMok7cRw6CSxyCQxXn6ozlESsSh1/sMCTF1rL/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js" integrity="sha512-WNLxfP/8cVYL9sj8Jnp6et0BkubLP31jhTG9vhL/F5uEZmg5wEzKoXp1kJslzPQWwPT1eyMiSxlKCgzHLOTOTQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.1/js/bootstrap.bundle.min.js" integrity="sha512-mULnawDVcCnsk9a4aG1QLZZ6rcce/jSzEGqUkeOLy0b6q0+T6syHrxlsAGH7ZVoqC93Pd0lBqd6WguPWih7VHA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> 
+    <script>
+        $(()=>{
+            if (!localStorage.getItem('access_token')){
+                $('#appoint').addClass('disabled')
+                $('#admin').css({display:'none'})
+                $('#signup').css({display:'inline-block'})
+                let logState = $('#log-state')
+                logState.html('Log in')
+                logState.attr('href', 'http://localhost:8000/account/login/')
+            }
+        })
+        let handleLogout = () => {
+            localStorage.clear()
+            window.location.href = 'http://localhost:8000/'
+        }
+    </script>
     {% block extra %}
     {% endblock %}   
 </body>

@@ -1,0 +1,82 @@
+{% extends 'main/base.html' %}
+{% block title %} Fritill clinic Password Reset {% endblock %}
+
+{% block main %} 
+
+<div class="row mt-5">
+    <div class="col-12 col-lg-8 mx-auto">
+        <div id="alerts"></div>
+        <form id="login-form" onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label for="password" class="form-label mt-3">New Password</label>
+                <input type="password" class="form-control" id="password" placeholder="New Password" required>
+            </div>
+
+
+            <div class="form-group">
+                <label for="password2" class="form-label mt-3">Re-password</label>
+                <input type="password" class="form-control" id="password2" placeholder="Re-password" required>
+            </div>
+           
+            <div class="form-group d-grid gap-2 mt-4">
+                <input type="submit" value="Change Password" class="btn btn-primary">
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block extra %} 
+<script>
+    let handleSubmit = e => {
+        e.preventDefault()
+        let url = new URL(window.location.href)
+        let resetData = {
+            password: $('#password').val(),
+            password_confirm: $('#password2').val(),
+            uid64: url.searchParams.get('uid64'),
+            token: url.searchParams.get('token')
+        }
+
+        if (url.searchParams.get('token_valid') === 'false'){
+            $('#alerts').append(`<div class="alert alert-dismissible alert-danger" id="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>Oh snap!</strong> This link has been expired try get new one
+            </div>`)
+            return;           
+        }
+        if ($('#password').val() !== $('#password2').val()) {
+            $('#alerts').append(`<div class="alert alert-dismissible alert-danger" id="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>Oh snap!</strong> Password dosen't match
+            </div>`)
+            return;
+        }
+        let jsonObj = JSON.stringify(resetData)
+        fetch('http://localhost:8000/auth/password-reset-confirm/', {
+            method: 'PATCH',
+            headers: {'content-type': 'application/json'},
+            body: jsonObj
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) window.location.href = 'http:localhost:8000/account/login/'
+            else {
+
+                for (let key in data) {
+                    for (err of data[key]) {
+                        $('#alerts').append(`<div class="alert alert-dismissible alert-danger" id="alert">
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <strong>Oh snap!</strong> ${err.substring(2, err.length-2)}
+                        </div>`)
+                    }
+                }
+            }
+
+        })
+    }
+</script>
+{% endblock %}

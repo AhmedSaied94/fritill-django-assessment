@@ -15,6 +15,10 @@
                 <small id="emailHelp" class="form-text text-muted">If your mail in our database youl receive mail to reset password.</small>
             </div>
 
+            <div class="form-group d-grid gap-2 mt-4">
+                <input type="submit" value="Request Email" class="btn btn-primary" id="submit">
+            </div>
+
         </form>
     </div>
 </div>
@@ -27,8 +31,7 @@
     let handleSubmit = e => {
         e.preventDefault()
         let loginData = {
-            username: $('#username').val(),
-            password: $('#password').val(),
+            email: $('#email').val(),
         }
         // if (newUser.password !== newUser.password2) $('#alerts').append(`<div class="alert alert-dismissible alert-danger" id="alert">
         //     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -36,18 +39,26 @@
         // </div>`)
         console.log(loginData)
         let jsonObj = JSON.stringify(loginData)
-        fetch('http://localhost:8000/auth/api/token/', {
+        fetch('http://localhost:8000/auth/password-reset-request/', {
             method: 'POST',
             headers: {'content-type': 'application/json'},
             body: jsonObj
         })
         .then(res => res.json())
         .then(data => {
-            if (data.access){
-                localStorage.setItem('access_token', data.access)
-                localStorage.setItem('refresh_token', data.refresh)
-                window.location.href = 'http://localhost:8000/'
+            if (data.success){
+                $('#alerts').append(`<div class="alert alert-dismissible alert-success" id="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong>Oh snap!</strong> ${data.success}
+                </div>`)
+                $('#submit').attr('disabled', true)
+            } else {
+                $('#alerts').append(`<div class="alert alert-dismissible alert-danger" id="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong>Oh snap!</strong> ${data.error}
+                </div>`)
             }
+            console.log(data)
         })
     }
 </script>

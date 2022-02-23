@@ -1,5 +1,10 @@
 from rest_framework import serializers
 from ..models import *
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
+from django.utils.encoding import smart_str
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.auth.password_validation import validate_password
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -37,3 +42,35 @@ class UserSerializer(serializers.ModelSerializer):
     # def get_appointments(self, obj):
     #     if obj.following:
     #         return FollowingSerializer(obj.following.all(), many=True).data
+
+
+class resetPasswordCompleteSerializer(serializers.Serializer):
+    password = serializers.CharField(required=True)
+    uid64 = serializers.CharField(required=True)
+    token = serializers.CharField(required=True)
+
+    class Meta:
+        fields = ['password', 'uid64', 'token']
+
+    def validate_password(self, value):
+        try:
+            validate_password(value)
+        except Exception as e:
+            raise serializers.ValidationError(str(e), code=400)
+        return value
+
+    def save(self, **kwargs):
+
+        uid64 = self.validated_data['uid64']
+        token = self.validated_data['token']
+        id = smart_str(urlsafe_base64_decode(uid64))
+        user = UserProfile.objects.get(id=id)
+        print(user, token)
+
+        if not PasswordResetTokenGenerator().check_token(user, token):
+            raise AuthenticationFailed(
+                detail='link has been expired', code=401)
+
+        user.set_password(self.validated_data['password'])
+        user.save()
+        return user

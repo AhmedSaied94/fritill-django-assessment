@@ -9,3 +9,11 @@ def signup(request):
 
 def login(request):
     return render(request, 'account/login.html')
+
+
+def resetPasswordRequest(request):
+    return render(request, 'account/pw_reset_request.html')
+
+
+def resetPasswordConfirm(request):
+    return render(request, 'account/pw_reset_confirm.html')

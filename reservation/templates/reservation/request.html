@@ -1,0 +1,94 @@
+{% extends 'main/base.html' %}
+
+{% block title %} Request Appointment {% endblock %}
+
+{% block main %}
+<div class="row mt-5">
+    <div class="col-12 col-lg-8 mx-auto">
+        <div id="alerts"></div>
+        <h3>Request an appointment with doctor <span id="doctor-span" class="text-primary">Doctor</span> at <span id="clinic-span" class="text-primary"></span> clinic</h3>
+        <form>
+            <div class="row form-group mt-5">
+                <label for="date" class="col-form-label">Please pick date and time</label>
+                <div class="row">
+                    <div class="form-group col-8">
+                        <div class="input-group date" id="datetimepicker">
+                            <div class="input-group input-group-addon input-group-prepend mb-3">
+                                <input type="text" class="form-control" aria-label="Choose data and time" readonly>
+                                <span class="input-group-text bg-primary"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" type="button" onclick="handleRequest(event)">Confirm Request</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{{ doctor|json_script:"doctor" }}
+{% endblock %}
+{% block extra %}
+<script>
+
+    let doctor = JSON.parse(document.getElementById('doctor').textContent)
+    $(() => {
+
+        $('#doctor-span').html(doctor.name)
+        $('#clinic-span').html(doctor.specialize)
+        $.extend(true, $.fn.datetimepicker.defaults, {
+            icons: {
+                time: 'far fa-clock',
+                date: 'far fa-calendar',
+                up: 'fas fa-arrow-up',
+                down: 'fas fa-arrow-down',
+                previous: 'fas fa-chevron-left',
+                next: 'fas fa-chevron-right',
+                today: 'far fa-calendar-check-o',
+                clear: 'far fa-trash',
+                close: 'far fa-times'
+            }
+        });
+        $('#datetimepicker').datetimepicker({
+                  ignoreReadonly: true,
+                  format: 'YYYY-MM-DDTHH:mm:ss'
+        });
+
+
+    });
+    let handleRequest = (e) => {
+        let date = $('#datetimepicker input').val()
+        data = JSON.stringify({
+            doctor:doctor.id,
+            date:date
+        })
+
+        $.ajax({
+            url:'http://localhost:8000/api/create-request/',
+            headers:{Authorization:`Bearer ${localStorage.getItem('access_token')}`},
+            contentType:'application/json',
+            dataType:'json',
+            data,
+            method:'POST',
+            success: (data => {
+                console.log(date)
+                $('#alerts').append(`<div class="alert alert-dismissible alert-success" id="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong>Success</strong> ${data.success}
+                </div>`)
+                e.target.setAttribute('disabled', true)
+            }),
+            error:(err => {
+                console.log(err)
+                $('#alerts').append(`<div class="alert alert-dismissible alert-danger" id="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong>Failed!</strong> ${err.responseJSON.error}
+                </div>`)
+            })
+        })
+    }
+</script>
+{% endblock %}

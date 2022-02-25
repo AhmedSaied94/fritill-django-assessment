@@ -1,0 +1,309 @@
+{% extends 'main/base.html' %}
+
+{% block title %} Admin Panel {% endblock %}
+
+{% block main %}
+ 
+<div class="row mt-5">
+    <div id="alerts"></div>
+    <div class="col-12 col-md-3 mt-3">
+        <h3>Filters</h3>
+        <div class="accordion" id="filters-menu">
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingOne">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    Users
+                </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#filters-menu">
+                <div class="accordion-body" id="user-body">
+                    <div class="form-check">
+                        <label class="form-check-label">
+                        <input type="radio" class="form-check-input" name="user-radios" value="all" onclick="handleFilter()">
+                        all users
+                        </label>
+                    </div>         
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingTwo">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                  Status
+                </button>
+              </h2>
+              <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#filters-menu">
+                <div class="accordion-body" id="status-body">
+                    
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header" id="headingThree">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                  Date
+                </button>
+              </h2>
+              <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#filters-menu">
+                <div class="accordion-body" id="date-body">
+                    <div class="form-group">
+                        <div class="input-group date" id="datetimepicker">
+                            <div class="input-group input-group-addon input-group-prepend mb-3">
+                                <input placeholder="select date" type="text" class="form-control" aria-label="Choose data and time" id="date-input">
+                                <span class="input-group-text bg-primary"><i class="fa fa-calendar"></i></span>
+                            </div>
+                        </div>
+                    </div>       
+                </div>
+              </div>
+            </div>
+          </div>
+    </div>
+    <div class="col-12 col-md-9">
+        <div class="pb-4">
+            <ul class="nav nav-pills mx-auto px-3" id="nav">
+                <li class="nav-item me-auto">
+                    <a class="nav-link bg-primary" style="cursor: pointer;" onclick="handleView('appointments')">Appointments</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link bg-warning" style="cursor: pointer;" onclick="handleView('requests')">Requests</a>
+                </li>
+                </ul>
+        </div>
+        <div id="appointments" class="row">
+
+        </div>
+        <div id="requests" class="row" style="display: none;">
+
+        </div>
+    </div>
+
+        
+
+</div>
+{% endblock %}
+
+{% block extra %}
+<script>
+    let baseUrl = `http://localhost:8000/`
+    let headers = {Authorization:`Bearer ${localStorage.getItem('access_token')}`}
+    let checkedValues = {}
+    let filterRadios;
+    let getAppoints = url => {
+        $.ajax({
+            url,
+            method:'GET',
+            contentType:'application/json',
+            headers,
+            dataType:'json',
+            success:(data => {
+                let appointments = data.reverse().map(appoint => {
+                    return (`
+                    <div class="col-12 col-md-6 col-lg-4 mx-auto clinic" >
+                        <div class="card mb-4">
+                            <h3 class="card-header">${appoint.user}</h3>
+                            <div class="card-body">
+                            <h5 class="card-title">
+                                Doctor ${appoint.doctor}</h5>
+                                <h5 class="card-title">${appoint.clinic} Clinic</h5
+                            <h6 class="card-subtitle text-muted">
+                                Status:${appoint.status}
+                            </h6>
+                            </div>
+                                
+                            <div class="card-body">
+                            <p class="card-text">${appoint.date.slice(0, 10)}</p>
+                            </div>
+                            <div class="card-footer text-muted">
+                                <a class="btn btn-outline-success m-1 p-1" onclick="handle(${appoint.id}, 'finished', 'appointment')">Finished</a>
+                                <a class="btn btn-outline-warning m-1 p-1" onclick="handle(${appoint.id}, 'missed', 'appointment')">Missed</a>
+                                <a class="btn btn-outline-danger m-1 p-1" onclick="handle(${appoint.id}, 'cancel', 'appointment')">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                    `)
+                })
+                $('#appointments').html('')
+                for (let appoint of appointments) $('#appointments').append(appoint)
+                
+            }),
+            error: (err => {
+                console.log(err)
+            })
+        })
+    }
+
+    let getRequests = () => {
+        $.ajax({
+            url:`${baseUrl}api/requests/`,
+            method:'GET',
+            contentType:'application/json',
+            headers,
+            dataType:'json',
+            success:(data => {
+                let requests = data.map(request => {
+                    return (`
+                    <div class="col-12 col-md-6 col-lg-4 mx-auto clinic" >
+                        <div class="card mb-4">
+                            <h3 class="card-header">${request.request_user} </h3>
+                            <div class="card-body">
+                            <h5 class="card-title">Doctor ${request.request_doctor}</h5>
+                            <h5 class="card-title">${request.clinic} Clinic</h5>
+                            <h6 class="card-subtitle text-muted">
+                                Status:Pending
+                            </h6>
+                            </div>
+                                
+                            <div class="card-body">
+                            <p class="card-text">${request.date.slice(0, 10)}</p>
+                            </div>
+                            <div class="card-footer text-muted">
+                                <a class="btn btn-outline-success m-1 p-1" onclick="handle(${request.id}, 'approve', 'request')">Approve</a>
+                                <a class="btn btn-outline-danger m-1 p-1" onclick="handle(${request.id}, 'cancel', 'request')">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                    `)
+                })
+                $('#requests').html('')
+                for (let request of requests) $('#requests').append(request)
+                
+            }),
+            error: (err => {
+                console.log(err)
+            })
+        })
+
+    }
+
+    let handleView = view => {
+        if (view == 'requests') {
+        $('#appointments').css({display:'none'})
+        $('#requests').css({display:'flex'})
+        } else {
+        $('#appointments').css({display:'flex'})
+        $('#requests').css({display:'none'})
+        }
+    }
+
+    let handle = (id, operation, type) => {   
+        let url = type === 'request' ?
+        `${baseUrl}api/handle-request/${id}/${operation}/`:
+        `${baseUrl}api/handle-appointment/${id}/${operation}/`
+        if (type==='appointment' && operation==='cancel'){
+            url = `${baseUrl}api/cancel-appointment/${id}/`
+        }
+        console.log('before')
+        let method = (type === 'appointment' && operation !== 'cancel') ? 'PATCH' : 'GET'
+        console.log('after')
+        $.ajax({
+            url,
+            method,
+            contentType:'application/json',
+            headers,
+            dataType:'json',
+            success: (data =>{
+                if (type === 'request') {
+                    getRequests()
+                    getAppoints(`${baseUrl}api/appointments/all/`)
+                } else getAppoints(`${baseUrl}api/appointments/all/`)
+   
+            })
+        })
+    }
+
+    $(()=>{
+        $.extend(true, $.fn.datetimepicker.defaults, {
+            icons: {
+                time: 'far fa-clock',
+                date: 'far fa-calendar',
+                up: 'fas fa-arrow-up',
+                down: 'fas fa-arrow-down',
+                previous: 'fas fa-chevron-left',
+                next: 'fas fa-chevron-right',
+                today: 'far fa-calendar-check-o',
+                clear: 'far fa-trash',
+                close: 'far fa-times'
+            }
+        });
+        $('#datetimepicker').datetimepicker({
+                ignoreReadonly: true,
+                format: 'YYYY-MM-DD'
+        });
+        $("#datetimepicker").on("dp.hide", function (e) {
+                checkedValues.date = $('#date-input').val()
+                handleFilter()
+        });
+        $.ajax({
+            url:`${baseUrl}auth/get-all-users/`,
+            method:'GET',
+            contentType:'application/json',
+            headers,
+            dataType:'json',
+            success:(data => {
+                let users = data.map(user => {
+                    return (`
+                        <div class="form-check">
+                            <label class="form-check-label">
+                            <input type="radio" class="form-check-input" name="user-radios" value="${user.id}" onclick="handleFilter()">
+                            ${user.username}
+                            </label>
+                        </div>  
+                    `)
+                })
+                users.map(user => $('#user-body').append(user))
+                filterRadios = {
+                    userRadios:$('input[name="user-radios"]'),
+                    statusRadios:$('input[name="status-radios"]')
+                }
+                
+            }),
+            error: (err => {
+                console.log(err)
+            })
+        })
+        let statusFilters = ['all', 'upcoming', 'past', 'finished', 'missed']
+        statusFilters.map(filter => {
+            $('#status-body').append(`
+                <div class="form-check">
+                    <label class="form-check-label">
+                    <input type="radio" class="form-check-input" name="status-radios" value="${filter}" onclick="handleFilter()">
+                    ${filter}
+                    </label>
+                </div> 
+            `)
+        })
+        checkedValues = {
+            user:'all',
+            status:'all',
+            date:false
+        }
+        getAppoints(`${baseUrl}api/appointments/all/`)
+        getRequests()
+    })
+
+    let get_checked_values = () => {
+        for (let i = 0; i < filterRadios.userRadios.length; i++) {
+            if (filterRadios.userRadios[i].checked) {
+                checkedValues.user = filterRadios.userRadios[i].value;
+                break;
+            }
+        }
+        for (let i = 0; i < filterRadios.statusRadios.length; i++) {
+            if (filterRadios.statusRadios[i].checked) {
+                checkedValues.status = filterRadios.statusRadios[i].value;
+                break;
+            }
+        }
+
+    }
+    let handleFilter = () => {
+        get_checked_values()
+        let url = checkedValues.date ? 
+        `${baseUrl}api/appointments/user=${checkedValues.user}&status=${checkedValues.status}&date=${checkedValues.date}/` : 
+        `${baseUrl}api/appointments/user=${checkedValues.user}&status=${checkedValues.status}/`
+        console.log(url)
+        getAppoints(url)
+    }
+</script>
+{% endblock %}

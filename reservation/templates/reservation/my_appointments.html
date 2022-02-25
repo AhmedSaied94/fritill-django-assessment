@@ -1,0 +1,101 @@
+{% extends 'main/base.html' %}
+
+{% block title %} My Appointments {% endblock %}
+
+{% block main %} 
+<div class="row mt-5">
+    <div id="alerts"></div>
+    <div class="py-5">
+        <ul class="nav nav-pills mx-auto" id="nav" style="width: fit-content;">
+            <li class="nav-item">
+                <a class="nav-link bg-primary" style="cursor: pointer;" onclick="handleContent('all')">All</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link bg-warning" style="cursor: pointer;" onclick="handleContent('upcoming')">Upcoming</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link bg-success" style="cursor: pointer;" onclick="handleContent('past')">Past</a>
+            </li>
+            </ul>
+    </div>
+        <div id="content" class="row">
+
+        </div>
+        
+
+</div>
+{% endblock %}
+
+{% block extra %}
+<script>
+    let url = `http://localhost:8000/api/appointments/`
+    let headers = {Authorization:`Bearer ${localStorage.getItem('access_token')}`}
+    let handleCancel = (id, status) => (
+        
+        $.ajax({
+            url:`http://localhost:8000/api/cancel-appointment/${id}/`,
+            method:'GET',
+            contentType:'application/json',
+            headers,
+            dataType:'json',
+            success:(data => {
+                handleContent(status)
+                $('#alerts').append(`<div class="alert alert-dismissible alert-success" id="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong>Success</strong> ${data.deleted}
+                </div>`)
+            }),
+            error: (err => {
+                $('#alerts').append(`<div class="alert alert-dismissible alert-danger" id="alert">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong>Success</strong> ${data.error}
+                </div>`)
+            })
+        })
+    )
+    let handleContent = (status) => {
+
+        $.ajax({
+            url:status === 'all'? `${url}${status}/` : `${url}status=${status}/`,
+            method:'GET',
+            contentType:'application/json',
+            headers,
+            dataType:'json',
+            success:(data => {
+                let appointments = data.reverse().map(i => {
+                    i = {...i, display:i.status==='waiting'?'inline-block':'none'}
+                    return i
+                })
+                console.log(appointments)
+                let mapd = appointments.map(appoint => {
+                    return (`
+                    <div class="col-12 col-md-6 col-lg-4 mx-auto clinic" >
+                        <div class="card mb-4">
+                            <h3 class="card-header">Doctor ${appoint.doctor}</h3>
+                            <div class="card-body">
+                            <h5 class="card-title">${appoint.clinic} Clinic</h5>
+                            <h6 class="card-subtitle text-muted">
+                                Status:${appoint.status}
+                            </h6>
+                            </div>
+                                
+                            <div class="card-body">
+                            <p class="card-text">${appoint.date.slice(0, 10)}</p>
+                            </div>
+                            <div class="card-footer text-muted">
+                                <a class="btn btn-outline-info" style="display: ${appoint.display}" onclick="handleCancel(${appoint.id}, '${status}')">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                    `)
+                })
+                $('#content').html('')
+                for (let appoint of mapd) $('#content').append(appoint)
+            })
+        })
+    }
+    $(()=>{
+        handleContent('all')
+    })
+</script> 
+{% endblock %}

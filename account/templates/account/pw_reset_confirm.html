@@ -63,7 +63,7 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (data.success) window.location.href = 'http:localhost:8000/account/login/'
+            if (data.success) window.location.href = '/account/login/'
             else {
 
                 for (let key in data) {

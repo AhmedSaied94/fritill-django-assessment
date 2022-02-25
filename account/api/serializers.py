@@ -1,14 +1,15 @@
+from django.http import request
 from rest_framework import serializers
 from ..models import *
-from rest_framework.exceptions import AuthenticationFailed, ValidationError
+from rest_framework.exceptions import AuthenticationFailed
 from django.utils.encoding import smart_str
 from django.utils.http import urlsafe_base64_decode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth.password_validation import validate_password
+from reservation.api.serializers import AppointmentSerializer, RequestSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
-    # appointments = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
@@ -21,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
             'last_name',
             'age',
             'gender',
-            # 'appointments',
+            'is_staff'
         ]
         extra_kwargs = {'password': {'write_only': True}}
 
@@ -38,10 +39,6 @@ class UserSerializer(serializers.ModelSerializer):
         user.set_password(self.validated_data.get('password'))
         user.save()
         return user
-
-    # def get_appointments(self, obj):
-    #     if obj.following:
-    #         return FollowingSerializer(obj.following.all(), many=True).data
 
 
 class resetPasswordCompleteSerializer(serializers.Serializer):

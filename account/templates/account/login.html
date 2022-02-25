@@ -45,6 +45,7 @@
         // </div>`)
         console.log(loginData)
         let jsonObj = JSON.stringify(loginData)
+        console.log()
         fetch('http://localhost:8000/auth/api/token/', {
             method: 'POST',
             headers: {'content-type': 'application/json'},

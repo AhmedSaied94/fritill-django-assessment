@@ -23,7 +23,7 @@ urlpatterns = [
     path('auth/', include('account.api.urls')),
     path('account/', include('account.urls')),
     path('', include('reservation.urls')),
-    # path('api/', include('reservation.api.urls'))
+    path('api/', include('reservation.api.urls'))
 ]
 
 

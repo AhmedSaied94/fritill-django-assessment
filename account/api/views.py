@@ -1,19 +1,33 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import smart_bytes, smart_str, DjangoUnicodeDecodeError
 from ..utils import Util
-from django.urls import reverse
 from django.shortcuts import redirect
 from .serializers import *
 
 
+@api_view(['GET'])
+def get_user(request):
+    user = UserProfile.objects.get(pk=request.user.id)
+    ser_user = UserSerializer(instance=user)
+    print(ser_user.data)
+    return Response(data=ser_user.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def get_all_users(request):
+    users = UserProfile.objects.filter(is_staff=False)
+    ser_users = UserSerializer(instance=users, many=True)
+    return Response(data=ser_users.data, status=status.HTTP_200_OK)
+
+
 @api_view(['POST'])
 def signup(request):
-    print(request.data)
 
     user = UserSerializer(data=request.data)
 

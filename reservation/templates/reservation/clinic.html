@@ -1,0 +1,100 @@
+{% extends 'main/base.html' %}
+
+{% block title %} {% endblock %}
+
+{% block main %}
+<div class="row mt-5" id="doctors">
+    <div id="alerts"></div>
+
+    
+
+    
+
+</div>
+{{ pk|json_script:"pk" }}
+{% endblock %}
+
+{% block extra %} 
+<script>
+    let x = JSON.parse(document.getElementById('pk').textContent);
+    
+
+    let url = `http://localhost:8000/api/clinic/${x}`
+    let headers = {Authorization:`Bearer ${localStorage.getItem('access_token')}`}
+    console.log(x)
+
+    $.ajax({
+        url,
+        method:'GET',
+        contentType:'application/json',
+        headers,
+        dataType:'json',
+        success:(clinic => {
+
+            let doctors = clinic.doctor
+            let arr = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satarday']
+            let days = clinic.days.sort().map(day => arr[day-1]).join(', ')
+            document.title = clinic.name + ' Clinic'
+            let mapd_doctors = doctors.map(doctor => {
+                return (
+                    `  <div class="col-12 col-md-6 col-lg-4 mx-auto clinic">  
+        <div class="card mb-4">
+            <h3 class="card-header">Doctor ${doctor.name}</h3>
+            <div class="card-body">
+              <h5 class="card-title">${doctor.specialize} Doctor</h5>
+              <h6 class="card-subtitle text-muted">
+                ${days}
+              </h6>
+            </div>
+            <div class="card-body">
+              <p class="card-text">${doctor.bio}</p>
+            </div>
+            <div class="card-body">
+              <a  class="btn btn-outline-success me-1" onclick="handleReserve(${doctor.id})">Reserve</a>
+              <a href="http://localhost:8000/request-appointment/${doctor.id}/" class="btn btn-outline-info">Request</a>
+            </div>
+            <div class="card-footer text-muted">
+                ${doctor.age} Years
+            </div>
+          </div>
+        </div>`
+                )
+            })
+            for (let doctor of mapd_doctors) {
+
+                $('#doctors').append(doctor)
+            }
+        }),
+        error:(err => console.log(err))
+    })
+
+    let handleReserve = (pk) => {
+        console.log(pk)
+        let data = JSON.stringify({'pk':pk})
+        let url = 'http://localhost:8000/api/create-appointment/'
+        $.ajax({
+            url,
+            headers,
+            contentType:'application/json',
+            dataType:'json',
+            data,
+            method:'POST',
+            success: (data => {
+                $('#alerts').append(`<div class="alert alert-dismissible alert-success" id="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>Success</strong> ${data.success}
+            </div>`)
+            }),
+            error:(err => {
+                console.log(err)
+                $('#alerts').append(`<div class="alert alert-dismissible alert-danger" id="alert">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>Failed!</strong> ${err.responseJSON.failed}
+            </div>`)
+            })
+        })
+    }
+
+
+</script>
+{% endblock %}

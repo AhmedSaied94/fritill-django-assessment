@@ -15,6 +15,7 @@ python-decouple = "*"
 pillow = "*"
 psycopg2 = "*"
 gunicorn = "*"
+whitenoise = "*"
 
 [dev-packages]
 

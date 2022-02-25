@@ -1,0 +1,16 @@
+lastDate = Oppointment.objects.filter(clinic=clinic).orderd_by('-date').first().date
+oppoints_count = Oppointment.objects.filter(clinic=clinic, finished=False, missed=False, data=lastDate).count()
+if oppoints.count > 5:
+available_day = ''
+days = clinic.dayes
+	for i in range(7):
+		for day in range(days):
+			if lastDate__week_day == day.num:
+				available_day = day.num
+				break 
+		if available_day != '':
+			break
+	if available_date < lastDate__week_day:
+		date = (date.now + 7 - abs(available_day-lastDate__week_date))days
+	else:
+		date = date.now()+ (available_day-lastDate__week_date)days
